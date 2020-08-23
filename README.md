@@ -8,7 +8,7 @@ Course Progress:
 [x] 02. Markdown Editor
 [x] 03. Browser Tabs and Routing
 [x] 04. Paper Rock Scissors
-[ ] 05. Moving Link Across a \_canvas\_
+[x] 05. Moving Link Across a \_canvas\_
 [ ] 06. Infinite Image Gallery
 [ ] 07. Trivia Game
 [ ] 08. Authentication
