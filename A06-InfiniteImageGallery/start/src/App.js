@@ -2,22 +2,46 @@ import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './App.css';
 
+// to use this app make add your unsplash api key to .env (start folder)
+// https://unsplash.com/developers
 const accessKey = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 export default function App() {
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     getPhotos();
+    // eslint-disable-next-line
   }, [page]);
 
   function getPhotos() {
-    fetch(`https://api.unsplash.com/photos?client_id=${accessKey}&page=${page}`)
+    let apiUrl = `https://api.unsplash.com/photos?`;
+    if (query) apiUrl = `https://api.unsplash.com/search/photos?query=${query}`;
+    apiUrl += `&page=${page}`;
+    apiUrl += `&client_id=${accessKey}`;
+
+    fetch(apiUrl)
       .then((res) => res.json())
       .then((data) => {
-        setImages((images) => [...images, ...data]);
+        const imagesFromApi = data.results ?? data;
+
+        // if page is 1, then we need a whole new array of images
+        if (page === 1) {
+          setImages(imagesFromApi);
+          return;
+        }
+
+        // if page > 1, then we are adding for our infinite scroll
+        setImages((images) => [...images, ...imagesFromApi]);
       });
+  }
+
+  function searchPhotos(e) {
+    e.preventDefault();
+    setPage(1);
+    getPhotos();
   }
 
   // return an error if there is no access key
@@ -32,13 +56,19 @@ export default function App() {
   return (
     <div className="app">
       <h1>Unsplash Image Gallery!</h1>
-      <form>
-        <input type="text" placeholder="Search Unsplash..." />
+
+      <form onSubmit={searchPhotos}>
+        <input
+          type="text"
+          placeholder="Search Unsplash..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <button>Search</button>
       </form>
 
       <InfiniteScroll
-        dataLength={images.length} //This is important field to render the next data
+        dataLength={images.length}
         next={() => setPage((page) => page + 1)}
         hasMore={true}
         loader={<h4>Loading...</h4>}
